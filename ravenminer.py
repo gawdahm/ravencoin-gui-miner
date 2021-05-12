@@ -3,8 +3,9 @@ import subprocess, os, pickle
 from sys import platform
 
 class RavenMiner :
-    PROCPATH : str = "./"
+    miner_path: str = "./"
     PROCNAME : str = "xmrig"
+    wallet_address = ""
     balance : str = "0"
     hashrate : str = "0"
     mining_pools = {
@@ -13,12 +14,13 @@ class RavenMiner :
     }
     mining_pool : MiningPool
 
-    def save_settings(self, wallet_address : str):
+    # TODO: Questionable that this should be included in this class.
+    def save_settings(self):
         a_file = open("data.pkl", "wb")
         dictionary_data = {
-            'wallet' : wallet_address, 
+            'wallet' : self.wallet_address, 
             'miningpoolname' : self.mining_pool.name,
-            'minerpath' : self.PROCPATH,
+            'minerpath' : self.miner_path,
             }
         pickle.dump(dictionary_data, a_file)
         a_file.close()
@@ -34,7 +36,7 @@ class RavenMiner :
             return
         #getminingdata(  )
         
-        p = subprocess.Popen(self.PROCPATH + self.PROCNAME + " --url=cryptonote.social:2222 --user {} --threads=1 --pass='email=runforestrun@airmail.cc'".format(wallet_address), shell=True)
+        p = subprocess.Popen(self.miner_path + self.PROCNAME + " --url=cryptonote.social:2222 --user {} --threads=1 --pass='email=runforestrun@airmail.cc'".format(wallet_address), shell=True)
         print("Mining started!")
 
     def stop_mining(self):
