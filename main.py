@@ -3,53 +3,21 @@ import subprocess, os, pickle
 from sys import platform
 from tkinter.filedialog import askopenfilename
 from ravenminer import RavenMiner
+
+
 raven_miner = RavenMiner()
-    
+root = Tk()
 
 def populate_mining_pool_dropdown():
     pools = []
     for key in raven_miner.mining_pools:
         pools.append(key)
     return pools
+
 # Button functions
 def change_dropdown(*args):
     raven_miner.mining_pool = raven_miner.mining_pools[miningpoolname.get()]
     print( miningpoolname.get() )
-
-def get_wallet_addr(*args):
-    print( walletaddr.get() )
-
-def save_settings():
-    a_file = open("data.pkl", "wb")
-    dictionary_data = {
-        'wallet' : walletaddr.get(), 
-        'miningpoolname' : miningpoolname.get(),
-        'minerpath' : minerpath.get(),
-        }
-    pickle.dump(dictionary_data, a_file)
-    a_file.close()
-
-def check_address():
-    if not walletaddr.get():
-        return False
-    return True
-
-def start_mining():
-    if not check_address():
-        print("Invalid wallet")
-        return
-    #getminingdata(  )
-    
-    p = subprocess.Popen(minerpath.get() + raven_miner.PROCNAME + " --url=cryptonote.social:2222 --user {} --threads=1 --pass='email=runforestrun@airmail.cc'".format(walletaddr.get()), shell=True)
-    print("Mining started!")
-
-def stop_mining():
-    if platform == "linux" or platform == "linux2" or platform == "darwin":
-        os.system('pkill '+ raven_miner.PROCNAME)
-    elif platform == "win32":
-        os.system("taskkill /f /im {}.exe".format(raven_miner.PROCNAME))
-
-root = Tk()
 
 # Menu
 def NewFile():
@@ -104,11 +72,10 @@ Label(mainframe, text=raven_miner.hashrate).grid(row = 5, column = 2)
 
 #  track changes
 miningpoolname.trace('w', change_dropdown)
-walletaddr.trace("w", get_wallet_addr)
 
-start_mining_btn = Button(mainframe, text = "Start Mining", command = lambda: start_mining()).grid(row = 6, column = 1)
-stop_mining_btn = Button(mainframe, text = "Stop Mining", command = lambda: stop_mining()).grid(row = 6, column = 2)
-save_settings_btn = Button(mainframe, text = "Save", command = lambda: save_settings()).grid(row = 7, column = 1)
+start_mining_btn = Button(mainframe, text = "Start Mining", command = lambda: raven_miner.start_mining(walletaddr.get())).grid(row = 6, column = 1)
+stop_mining_btn = Button(mainframe, text = "Stop Mining", command = lambda: raven_miner.stop_mining()).grid(row = 6, column = 2)
+save_settings_btn = Button(mainframe, text = "Save", command = lambda: raven_miner.save_settings(walletaddr.get())).grid(row = 7, column = 1)
 
 
 # Load settings
@@ -117,17 +84,18 @@ save_settings_btn = Button(mainframe, text = "Save", command = lambda: save_sett
 if not os.path.isfile("data.pkl"):
     f = open("data.pkl", "w")
     f.close()
-    save_settings()
-
+    raven_miner.mining_pool = raven_miner.mining_pools['Ravenpool']
+    raven_miner.save_settings(walletaddr.get())
 
 a_file = open("data.pkl", "rb")
 output = pickle.load(a_file)
 a_file.close()
 
+print(output)
 # Populate fields
 walletaddr.set(output['wallet'])
 minerpath.set(output['minerpath']) # set the default option
 miningpoolname.set(output['miningpoolname']) # set the default option
 raven_miner.mining_pool = raven_miner.mining_pools[output['miningpoolname']]
 
-mainloop()
+root.mainloop()
