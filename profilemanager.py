@@ -1,18 +1,25 @@
 from tkinter import *
+from enum import Enum
+class ProfileModes(Enum):
+    ADD_PROFILE = 1
+    EDIT_PROFILE = 2
 
-# TODO: Path isn't saved yet.
-
-class RavenMinerGUISettingsWindow():
+class RavenMinerGUIProfileManager():
     def __init__(self, master, raven_miner):
         self.master = master
+        self.mode = ProfileModes.ADD_PROFILE
         self.window = ""
         self.raven_miner = raven_miner
         return
-        
+    
     def open(self):
         if not self.window:
             self.window = Toplevel(self.master)
-            self.window.title("Settings")
+            if self.mode == ProfileModes.ADD_PROFILE:
+                    self.window.title("Add Profile")
+            elif self.mode == ProfileModes.EDIT_PROFILE:
+                    self.window.title("Edit Profile")
+                    
             self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
             # Grid configuration
@@ -25,11 +32,6 @@ class RavenMinerGUISettingsWindow():
             # Create variables
             self.miningpoolname = StringVar(self.window)
             self.walletaddr = StringVar(self.window)
-            self.minerpath = StringVar(self.window)
-
-            # Miner Path
-            Label(self.mainframe, text="Path to executable: ").grid(row = 1, column = 1)
-            miner_path_entry = Entry(self.mainframe, textvariable=self.minerpath).grid(row = 1, column = 2)
 
             # Wallet Info
             Label(self.mainframe, text="Wallet Address: ").grid(row = 2, column = 1)
@@ -48,7 +50,6 @@ class RavenMinerGUISettingsWindow():
 
             # Populate fields
             self.walletaddr.set(self.raven_miner.wallet_address)
-            self.minerpath.set(self.raven_miner.miner_path)
             self.miningpoolname.set(self.raven_miner.mining_pool.name)
     
     def save_settings(self):
