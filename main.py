@@ -1,36 +1,19 @@
 from tkinter import *
-import subprocess, os, requests, pickle, threading,  time
+import subprocess, os, pickle
 from sys import platform
 from tkinter.filedialog import askopenfilename
-
-PROCPATH = "./"
-PROCNAME = "xmrig"
-balance = "0"
-hashrate = "0"
-
-
-mining_pools = {
-    'Ravenpool' : { 'url' : 'https://www.ravenminer.com/api/wallet?address=', 'balance_key' : 'balance'},
-    '2miners' : { 'url' : 'https://btg.2miners.com/api/accounts/', 'balance_key' : 'balance'},
-    'Test' : { 'url' : 'https://btg.2miners.com/api/accounts/', 'balance_key' : 'balance'},
-}
-
-def getminingdata():
-    # Ravenminer and 2miners have an open api and don't require registration
-    headers = {
-        'accept': 'application/json',
-    }
-
-    print(requests.get(mining_pools[miningpoolname.get()]['url'] + walletaddr.get(), headers=headers).content)
+from ravenminer import RavenMiner
+raven_miner = RavenMiner()
+    
 
 def populate_mining_pool_dropdown():
     pools = []
-    for key in mining_pools:
+    for key in raven_miner.mining_pools:
         pools.append(key)
     return pools
-
 # Button functions
 def change_dropdown(*args):
+    raven_miner.mining_pool = raven_miner.mining_pools[miningpoolname.get()]
     print( miningpoolname.get() )
 
 def get_wallet_addr(*args):
@@ -56,14 +39,15 @@ def start_mining():
         print("Invalid wallet")
         return
     #getminingdata(  )
-    p = subprocess.Popen(minerpath.get() + PROCNAME + " --url=cryptonote.social:2222 --user {} --threads=1 --pass='email=runforestrun@airmail.cc'".format(walletaddr.get()), shell=True)
+    
+    p = subprocess.Popen(minerpath.get() + raven_miner.PROCNAME + " --url=cryptonote.social:2222 --user {} --threads=1 --pass='email=runforestrun@airmail.cc'".format(walletaddr.get()), shell=True)
     print("Mining started!")
 
 def stop_mining():
     if platform == "linux" or platform == "linux2" or platform == "darwin":
-        os.system('pkill '+PROCNAME)
+        os.system('pkill '+ raven_miner.PROCNAME)
     elif platform == "win32":
-        os.system("taskkill /f /im {}.exe".format(PROCNAME))
+        os.system("taskkill /f /im {}.exe".format(raven_miner.PROCNAME))
 
 root = Tk()
 
@@ -114,9 +98,9 @@ popupMenu = OptionMenu(mainframe, miningpoolname, *choices)
 Label(mainframe, text="Mining Pool: ").grid(row = 3, column = 1)
 popupMenu.grid(row = 3, column = 2)
 Label(mainframe, text="Hashrate ").grid(row = 4, column = 1)
-Label(mainframe, text=balance).grid(row = 4, column = 2)
+Label(mainframe, text=raven_miner.balance).grid(row = 4, column = 2)
 Label(mainframe, text="Balance ").grid(row = 5, column = 1)
-Label(mainframe, text=hashrate).grid(row = 5, column = 2)
+Label(mainframe, text=raven_miner.hashrate).grid(row = 5, column = 2)
 
 #  track changes
 miningpoolname.trace('w', change_dropdown)
@@ -144,5 +128,6 @@ a_file.close()
 walletaddr.set(output['wallet'])
 minerpath.set(output['minerpath']) # set the default option
 miningpoolname.set(output['miningpoolname']) # set the default option
+raven_miner.mining_pool = raven_miner.mining_pools[output['miningpoolname']]
 
 mainloop()
