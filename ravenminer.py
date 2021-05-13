@@ -14,17 +14,6 @@ class RavenMiner :
     }
     mining_pool : MiningPool
 
-    # TODO: Questionable that this should be included in this class.
-    def save_settings(self):
-        a_file = open("data.pkl", "wb")
-        dictionary_data = {
-            'wallet' : self.wallet_address, 
-            'miningpoolname' : self.mining_pool.name,
-            'minerpath' : self.miner_path,
-            }
-        pickle.dump(dictionary_data, a_file)
-        a_file.close()
-
     def check_address(self, wallet_address : str):
         if not wallet_address:
             return False

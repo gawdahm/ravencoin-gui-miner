@@ -51,6 +51,7 @@ class RavenMinerGUISettingsWindow():
             self.minerpath.set(self.raven_miner.miner_path)
             self.miningpoolname.set(self.raven_miner.mining_pool.name)
     
+    # TODO: Old. Bad. Broken.
     def save_settings(self):
         self.raven_miner.wallet_address = self.walletaddr.get()
         # TODO: move save_settings here
